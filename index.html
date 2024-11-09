@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mobility Timer</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
+      }
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background-color: #f9f9f9;
+      }
+      .container {
+        text-align: center;
+        max-width: 300px;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        padding: 20px;
+      }
+      .title {
+        font-size: 24px;
+        margin-bottom: 10px;
+        color: #555;
+      }
+      .exercise-title {
+        font-size: 18px;
+        color: #888;
+      }
+      .timer {
+        font-size: 48px;
+        margin: 20px 0;
+        color: #555;
+      }
+      .image-placeholder {
+        width: 150px;
+        height: 150px;
+        background-color: #eee;
+        border-radius: 50%;
+        margin: 0 auto;
+      }
+      .buttons {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 20px;
+      }
+      .button {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: none;
+        background-color: #ddd;
+        font-size: 20px;
+        color: #555;
+        cursor: pointer;
+      }
+      .button:active {
+        background-color: #bbb;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div id="exerciseCount" class="title">1 of 9</div>
+      <img id="exercisePose" class="image-placeholder" src="assets/upward-salute.png"></img>
+      <div id="exerciseTitle" class="exercise-title">Upward Salute - Begin</div>
+      <div id="timer" class="timer">0:10</div>
+      <div class="buttons">
+        <button class="button" onclick="prevExercise()">⏪</button>
+        <button class="button" id="playPauseBtn" onclick="toggleTimer()">
+          ▶️
+        </button>
+        <button class="button" onclick="nextExercise()">✔️</button>
+      </div>
+    </div>
+
+    <audio id="tickSound" src="stopwatch-ticking.mp3" preload="auto"></audio>
+
+    <script>
+      // List of exercises
+      const exercises = [
+        { title: "Upward Salute - Begin", duration: 30, src: 'assets/upward-salute.png'}, // 20–30 seconds
+        { title: "Toe Touch", duration: 30, src: 'assets/uttanasanan.avif' }, // 15–30 seconds on each side
+        { title: "Lunge", duration: 30, src: 'assets/lunge.avif' }, // 20–30 seconds on each side
+        { title: "Upward Dog", duration: 30, src: 'assets/upward-facing-dog.jpg' }, // 1–2 minutes, as a flowing movement
+        { title: "Child's Poss", duration: 20, src: 'assets/childs-pose.webp' }, // 10–20 seconds on each side
+        { title: "Downward Dog", duration: 30, src: 'assets/mukha-svanasana.webp' }, // 20–30 seconds
+        { title: "Wide Leg Bend", duration: 20, src: 'assets/wide leg bend.webp' }, // 15–30 seconds
+        { title: "Upward Salute - End", duration: 30, src: 'assets/upward-salute.png' }, // 20–30 seconds
+      ];
+
+      let currentExerciseIndex = 0;
+      let timerDuration = exercises[currentExerciseIndex].duration;
+      let timerInterval = null;
+      let isPlaying = false;
+
+      function updateExerciseDisplay() {
+        document.getElementById("exerciseCount").innerText = `${
+          currentExerciseIndex + 1
+        } of ${exercises.length}`;
+        document.getElementById("exerciseTitle").innerText =
+          exercises[currentExerciseIndex].title;
+        document.getElementById("exercisePose").src =
+          exercises[currentExerciseIndex].src;
+        timerDuration = exercises[currentExerciseIndex].duration;
+        updateTimerDisplay();
+      }
+
+      function updateTimerDisplay() {
+        const minutes = Math.floor(timerDuration / 60);
+        const seconds = timerDuration % 60;
+        document.getElementById("timer").innerText = `${minutes}:${seconds
+          .toString()
+          .padStart(2, "0")}`;
+      }
+
+      function toggleTimer() {
+        if (isPlaying) {
+          pauseTimer();
+        } else {
+          startTimer();
+        }
+      }
+
+      function startTimer() {
+        isPlaying = true;
+        document.getElementById("playPauseBtn").innerText = "⏸️";
+        timerInterval = setInterval(() => {
+          if (timerDuration > 0) {
+            timerDuration--;
+            updateTimerDisplay();
+            // Play tick sound for last 3 seconds
+            if (timerDuration <= 3) {
+              document.getElementById("tickSound").play();
+            }
+          } else {
+            document.getElementById("tickSound").pause();
+            document.getElementById("tickSound").currentTime = 0; // Reset the sound to start from the beginning
+            pauseTimer();
+          }
+        }, 1000);
+      }
+
+      function pauseTimer() {
+        isPlaying = false;
+        document.getElementById("playPauseBtn").innerText = "▶️";
+        clearInterval(timerInterval);
+      }
+
+      function resetTimer() {
+        pauseTimer();
+        timerDuration = exercises[currentExerciseIndex].duration;
+        updateTimerDisplay();
+      }
+
+      function prevExercise() {
+        if (currentExerciseIndex > 0) {
+          currentExerciseIndex--;
+          resetTimer();
+          updateExerciseDisplay();
+        } else {
+          alert("This is the first exercise.");
+        }
+      }
+
+      function nextExercise() {
+        if (currentExerciseIndex < exercises.length - 1) {
+          currentExerciseIndex++;
+          resetTimer();
+          updateExerciseDisplay();
+        } else {
+          alert("This is the last exercise.");
+        }
+      }
+
+      // Initialize display
+      updateExerciseDisplay();
+    </script>
+  </body>
+</html>
